@@ -1,5 +1,6 @@
 ;--------- loader and the kernel ------------
 LOADER_BASE_ADDR equ 0x900-3
+LOADER_STACK_TOP equ LOADER_BASE_ADDR
 LOADER_START_SECTOR equ 0x2
 ;--------------   gdt描述符属性  -----------
 DESC_G_4K   equ	  1_00000000000000000000000b   

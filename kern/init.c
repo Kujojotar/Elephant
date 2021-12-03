@@ -1,6 +1,7 @@
 #include "init.h"
 #include "print.h"
 #include "interrupt.h"
+#include "memory.h"
 #include "timer.h"
 
 void init_all(){

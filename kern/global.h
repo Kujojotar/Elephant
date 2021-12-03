@@ -12,7 +12,7 @@
 
 #define SELECTOR_K_CODE ((1<<3)+(TI_GDT<<2)+RPL0)
 #define SELECTOR_K_DATA ((2<<3)+(TI_GDT<<2)+RPL0)
-#define SELECTOR_K_STACK SELECTOR_K_CODE
+#define SELECTOR_K_STACK SELECTOR_K_DATA
 #define SELECTOR_K_GS ((3<<3)+(TI_GDT<<2)+RPL0)
 
 #define IDT_DESC_P       1
@@ -27,5 +27,10 @@
   ((IDT_DESC_P << 7) + (IDT_DESC_DPL3 << 5) + IDT_DESC_32_TYPE )
 
 #endif
+
+#define NULL 0
+#define bool int
+#define true 1
+#define false 0
 
 

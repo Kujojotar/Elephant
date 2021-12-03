@@ -19,6 +19,10 @@ struct gate_desc {
     uint16_t func_offset_high_word;
 };
 
+#define EFLAGS_IF 0x00000200
+//"=g" in inline asm means it can be stored in any memory
+#define GET_EFLAGS(EFLAG_VAR) asm volatile("pushfl; popl %0" : "=g" (EFLAG_VAR))
+
 //static void make_idt_desc(struct gate_desc* p_gdesc, uint8_t attr, intr_handler function);
 
 static struct gate_desc idt[IDT_DESC_CNT];
@@ -111,4 +115,37 @@ void idt_init(){
     put_str("idt_init done\n");
 }
 
+enum intr_status intr_enable(){
+    enum intr_status old_status;
+    if(INTR_ON == intr_get_status()){
+        old_status = INTR_ON;
+        return old_status;
+    }else{
+        old_status = INTR_OFF;
+        asm __volatile__("sti");
+        return old_status;
+    }
+}
 
+enum intr_status intr_disable(){
+    enum intr_status old_status;
+    if(INTR_ON == intr_get_status()){
+        old_status = INTR_ON;
+        asm __volatile__("cli" : : : "memory");
+        return old_status;
+    }else{
+        old_status = INTR_OFF;
+        return old_status;
+    }
+
+}
+
+enum intr_status intr_set_status(enum intr_status status){
+    return status & INTR_ON ? intr_enable() : intr_disable();
+}
+
+enum intr_status intr_get_status(){
+    uint32_t eflags;
+    GET_EFLAGS(eflags);
+    return (EFLAGS_IF & eflags) ? INTR_ON : INTR_OFF;
+}
