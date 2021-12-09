@@ -4,6 +4,7 @@
 #include "thread.h"
 #include "interrupt.h"
 #include "debug.h"
+#include "console.h"
 
 #define IRQ0_FREQUENCY     100
 #define INPUT_FERQUENCY    1193180
@@ -24,7 +25,7 @@ static void frequency_set(uint8_t counter_port, uint8_t counter_no, uint8_t rwl,
 
 static void intr_timer_handler(){
     struct task_struct* cur_thread = running_thread();
- 
+    //console_put_str("time intr happened\n");
     ASSERT(cur_thread->stack_magic == 0x19870916);
 
     cur_thread->elapsed_ticks++;
@@ -38,7 +39,7 @@ static void intr_timer_handler(){
 }
 
 void timer_init(){
-    frequency_set(COUNTER0_PORT,COUNTER0_NO,READ_WRITE_LATCH,COUNTER_MODE,COUNTER0_VALUE);
+   frequency_set(COUNTER0_PORT,COUNTER0_NO,READ_WRITE_LATCH,COUNTER_MODE,COUNTER0_VALUE);
     put_str("timer init fished\n"); 
     register_handler(0x20, intr_timer_handler);
     put_str("timer_init done\n");

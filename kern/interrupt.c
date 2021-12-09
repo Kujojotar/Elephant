@@ -4,7 +4,7 @@
 #include "io.h"
 #include "print.h"
 
-#define IDT_DESC_CNT 0x21
+#define IDT_DESC_CNT 0x30
 
 #define PIC_M_CTRL 0x20
 #define PIC_M_DATA 0x21
@@ -47,6 +47,9 @@ static void pic_init(){
   
     outb(PIC_M_DATA, 0xfe);
     outb(PIC_S_DATA, 0xff);
+
+    //outb(PIC_M_DATA, 0xfd);
+    //outb(PIC_S_DATA, 0xff);
     put_str("  pic_init done \n");
 }
 

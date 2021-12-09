@@ -2,15 +2,17 @@
 Allocating common symbols
 Common symbol       size              file
 
+kbd_buf             0x6c              obj/keyboard.o
 thread_ready_list   0x10              obj/thread.o
+tss                 0x6c              obj/tss.o
 thread_all_list     0x10              obj/thread.o
-user_pool           0x10              obj/memory.o
-intr_name           0x84              obj/interrupt.o
+user_pool           0x2c              obj/memory.o
+intr_name           0xc0              obj/interrupt.o
 main_thread         0x4               obj/thread.o
 ticks               0x4               obj/timer.o
 kernel_vaddr        0xc               obj/memory.o
-idt_table           0x84              obj/interrupt.o
-kernel_pool         0x10              obj/memory.o
+idt_table           0xc0              obj/interrupt.o
+kernel_pool         0x2c              obj/memory.o
 
 Discarded input sections
 
@@ -19,21 +21,33 @@ Discarded input sections
  .note.GNU-stack
                 0x0000000000000000        0x0 obj/init.o
  .note.GNU-stack
-                0x0000000000000000        0x0 obj/bitmap.o
- .note.GNU-stack
-                0x0000000000000000        0x0 obj/string.o
- .note.GNU-stack
                 0x0000000000000000        0x0 obj/interrupt.o
  .note.GNU-stack
                 0x0000000000000000        0x0 obj/timer.o
  .note.GNU-stack
-                0x0000000000000000        0x0 obj/list.o
+                0x0000000000000000        0x0 obj/debug.o
  .note.GNU-stack
                 0x0000000000000000        0x0 obj/memory.o
  .note.GNU-stack
+                0x0000000000000000        0x0 obj/bitmap.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 obj/string.o
+ .note.GNU-stack
                 0x0000000000000000        0x0 obj/thread.o
  .note.GNU-stack
-                0x0000000000000000        0x0 obj/debug.o
+                0x0000000000000000        0x0 obj/list.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 obj/console.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 obj/sync.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 obj/keyboard.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 obj/ioqueue.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 obj/tss.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 obj/process.o
 
 Memory Configuration
 
@@ -44,18 +58,24 @@ Linker script and memory map
 
 Address of section .text set to 0xc0001500
 LOAD obj/main.o
-LOAD obj/print.o
 LOAD obj/init.o
-LOAD obj/bitmap.o
-LOAD obj/string.o
 LOAD obj/interrupt.o
 LOAD obj/timer.o
 LOAD obj/kernel.o
+LOAD obj/print.o
+LOAD obj/debug.o
+LOAD obj/memory.o
+LOAD obj/bitmap.o
+LOAD obj/string.o
+LOAD obj/thread.o
 LOAD obj/list.o
 LOAD obj/switch.o
-LOAD obj/memory.o
-LOAD obj/thread.o
-LOAD obj/debug.o
+LOAD obj/console.o
+LOAD obj/sync.o
+LOAD obj/keyboard.o
+LOAD obj/ioqueue.o
+LOAD obj/tss.o
+LOAD obj/process.o
                 [!provide]                        PROVIDE (__executable_start, 0x8048000)
                 0x0000000008048094                . = (0x8048000 + SIZEOF_HEADERS)
 
@@ -118,80 +138,122 @@ LOAD obj/debug.o
 .plt.got
  *(.plt.got)
 
-.text           0x00000000c0001500     0x1d44
+.text           0x00000000c0001500     0x313a
  *(.text.unlikely .text.*_unlikely .text.unlikely.*)
  *(.text.exit .text.exit.*)
  *(.text.startup .text.startup.*)
  *(.text.hot .text.hot.*)
  *(.text .stub .text.* .gnu.linkonce.t.*)
- .text          0x00000000c0001500       0xac obj/main.o
+ .text          0x00000000c0001500      0x124 obj/main.o
                 0x00000000c0001500                main
-                0x00000000c000157a                k_thread_a
-                0x00000000c0001593                k_thread_b
- *fill*         0x00000000c00015ac        0x4 
- .text          0x00000000c00015b0      0x14e obj/print.o
-                0x00000000c00015b0                put_str
-                0x00000000c00015ce                put_char
-                0x00000000c000167d                set_cursor
-                0x00000000c000169b                put_int
- .text          0x00000000c00016fe       0x23 obj/init.o
-                0x00000000c00016fe                init_all
- .text          0x00000000c0001721      0x279 obj/bitmap.o
-                0x00000000c0001721                bitmap_init
-                0x00000000c0001748                bitmap_scan_test
-                0x00000000c00017ab                bitmap_scan
-                0x00000000c00018e7                bitmap_set
- .text          0x00000000c000199a      0x3f9 obj/string.o
-                0x00000000c000199a                memset
-                0x00000000c00019ee                memcpy
-                0x00000000c0001a52                memcmp
-                0x00000000c0001ada                strcpy
-                0x00000000c0001b34                strlen
-                0x00000000c0001b82                strcmp
-                0x00000000c0001c01                strchr
-                0x00000000c0001c5e                strrchr
-                0x00000000c0001cbf                strcat
-                0x00000000c0001d2e                strchrs
- .text          0x00000000c0001d93      0x449 obj/interrupt.o
-                0x00000000c00020d1                idt_init
-                0x00000000c0002133                intr_enable
-                0x00000000c000215c                intr_disable
-                0x00000000c0002185                register_handler
-                0x00000000c00021a1                intr_set_status
-                0x00000000c00021bf                intr_get_status
- .text          0x00000000c00021dc      0x188 obj/timer.o
-                0x00000000c0002304                timer_init
- *fill*         0x00000000c0002364        0xc 
- .text          0x00000000c0002370      0x393 obj/kernel.o
-                0x00000000c0002370                intr_exit
- .text          0x00000000c0002703      0x186 obj/list.o
-                0x00000000c0002703                list_init
-                0x00000000c0002730                list_insert_before
-                0x00000000c0002771                list_push
-                0x00000000c000278e                list_append
-                0x00000000c00027ab                list_remove
-                0x00000000c00027e1                list_pop
-                0x00000000c0002800                list_empty
-                0x00000000c0002819                list_len
-                0x00000000c000284e                elem_find
- *fill*         0x00000000c0002889        0x7 
- .text          0x00000000c0002890       0x15 obj/switch.o
-                0x00000000c0002890                switch_to
- .text          0x00000000c00028a5      0x50c obj/memory.o
-                0x00000000c0002a47                mem_init
-                0x00000000c0002b06                pte_ptr
-                0x00000000c0002b36                pde_ptr
-                0x00000000c0002cab                malloc_page
-                0x00000000c0002d6d                get_kernel_pages
- .text          0x00000000c0002db1      0x3ee obj/thread.o
-                0x00000000c0002db1                running_thread
-                0x00000000c0002dde                thread_create
-                0x00000000c0002e54                init_thread
-                0x00000000c0002eef                thread_start
-                0x00000000c0003052                schedule
-                0x00000000c0003162                thread_init
- .text          0x00000000c000319f       0xa5 obj/debug.o
-                0x00000000c000319f                panic_spin
+                0x00000000c00015b2                k_thread_a
+                0x00000000c00015d9                k_thread_b
+                0x00000000c0001600                u_prog_a
+                0x00000000c0001612                u_prog_b
+ .text          0x00000000c0001624       0x37 obj/init.o
+                0x00000000c0001624                init_all
+ .text          0x00000000c000165b      0x449 obj/interrupt.o
+                0x00000000c0001999                idt_init
+                0x00000000c00019fb                intr_enable
+                0x00000000c0001a24                intr_disable
+                0x00000000c0001a4d                register_handler
+                0x00000000c0001a69                intr_set_status
+                0x00000000c0001a87                intr_get_status
+ .text          0x00000000c0001aa4      0x188 obj/timer.o
+                0x00000000c0001bcc                timer_init
+ *fill*         0x00000000c0001c2c        0x4 
+ .text          0x00000000c0001c30      0x537 obj/kernel.o
+                0x00000000c0001c30                intr_exit
+ *fill*         0x00000000c0002167        0x9 
+ .text          0x00000000c0002170      0x14e obj/print.o
+                0x00000000c0002170                put_str
+                0x00000000c000218e                put_char
+                0x00000000c000223d                set_cursor
+                0x00000000c000225b                put_int
+ .text          0x00000000c00022be       0xa5 obj/debug.o
+                0x00000000c00022be                panic_spin
+ .text          0x00000000c0002363      0x7ab obj/memory.o
+                0x00000000c0002505                mem_init
+                0x00000000c000267a                pte_ptr
+                0x00000000c00026aa                pde_ptr
+                0x00000000c000281f                malloc_page
+                0x00000000c00028e1                get_kernel_pages
+                0x00000000c000293d                get_user_pages
+                0x00000000c0002993                get_a_page
+                0x00000000c0002ae2                addr_v2p
+ .text          0x00000000c0002b0e      0x279 obj/bitmap.o
+                0x00000000c0002b0e                bitmap_init
+                0x00000000c0002b35                bitmap_scan_test
+                0x00000000c0002b98                bitmap_scan
+                0x00000000c0002cd4                bitmap_set
+ .text          0x00000000c0002d87      0x3f9 obj/string.o
+                0x00000000c0002d87                memset
+                0x00000000c0002ddb                memcpy
+                0x00000000c0002e3f                memcmp
+                0x00000000c0002ec7                strcpy
+                0x00000000c0002f21                strlen
+                0x00000000c0002f6f                strcmp
+                0x00000000c0002fee                strchr
+                0x00000000c000304b                strrchr
+                0x00000000c00030ac                strcat
+                0x00000000c000311b                strchrs
+ .text          0x00000000c0003180      0x510 obj/thread.o
+                0x00000000c0003180                running_thread
+                0x00000000c00031ad                thread_create
+                0x00000000c0003223                init_thread
+                0x00000000c00032be                thread_start
+                0x00000000c0003421                schedule
+                0x00000000c000353c                thread_init
+                0x00000000c0003579                thread_block
+                0x00000000c00035d8                thread_unblock
+                0x00000000c0003686                get_ready_list
+ .text          0x00000000c0003690      0x1e3 obj/list.o
+                0x00000000c0003690                list_init
+                0x00000000c00036bd                list_insert_before
+                0x00000000c00036fe                list_push
+                0x00000000c000371b                list_append
+                0x00000000c0003738                list_remove
+                0x00000000c000376e                list_pop
+                0x00000000c000378d                list_empty
+                0x00000000c00037a6                list_len
+                0x00000000c00037db                list_traversal
+                0x00000000c0003838                elem_find
+ *fill*         0x00000000c0003873        0xd 
+ .text          0x00000000c0003880       0x15 obj/switch.o
+                0x00000000c0003880                switch_to
+ .text          0x00000000c0003895       0x9a obj/console.o
+                0x00000000c0003895                console_init
+                0x00000000c00038a9                console_acquire
+                0x00000000c00038bd                console_release
+                0x00000000c00038d1                console_put_str
+                0x00000000c00038ee                console_put_char
+                0x00000000c0003912                console_put_int
+ .text          0x00000000c000392f      0x2c6 obj/sync.o
+                0x00000000c000392f                sema_init
+                0x00000000c0003954                lock_init
+                0x00000000c0003985                sema_down
+                0x00000000c0003a40                sema_up
+                0x00000000c0003ae6                lock_acquire
+                0x00000000c0003b5a                lock_release
+ .text          0x00000000c0003bf5      0x2b3 obj/keyboard.o
+                0x00000000c0003c12                intr_keyboard_handler
+                0x00000000c0003e80                keyboard_init
+ .text          0x00000000c0003ea8      0x2bf obj/ioqueue.o
+                0x00000000c0003ea8                ioqueue_init
+                0x00000000c0003f03                ioq_full
+                0x00000000c0003f4c                ioq_empty
+                0x00000000c000401b                ioq_getchar
+                0x00000000c00040c0                ioq_putchar
+ .text          0x00000000c0004167      0x194 obj/tss.o
+                0x00000000c0004167                update_tss_esp
+                0x00000000c00041e8                tss_init
+ .text          0x00000000c00042fb      0x33f obj/process.o
+                0x00000000c00042fb                start_process
+                0x00000000c0004401                page_dir_activate
+                0x00000000c0004431                process_activate
+                0x00000000c000447b                create_page_dir
+                0x00000000c00044ec                create_user_vaddr_bitmap
+                0x00000000c000452e                process_execute
  *(.gnu.warning)
 
 .fini
@@ -200,18 +262,24 @@ LOAD obj/debug.o
                 [!provide]                        PROVIDE (_etext, .)
                 [!provide]                        PROVIDE (etext, .)
 
-.rodata         0x00000000c0003244      0x568
+.rodata         0x00000000c000463c      0x71e
  *(.rodata .rodata.* .gnu.linkonce.r.*)
- .rodata        0x00000000c0003244       0x2a obj/main.o
- .rodata        0x00000000c000326e        0xa obj/init.o
- .rodata        0x00000000c0003278       0x38 obj/bitmap.o
- .rodata        0x00000000c00032b0       0x57 obj/string.o
- *fill*         0x00000000c0003307        0x1 
- .rodata        0x00000000c0003308      0x2d3 obj/interrupt.o
- .rodata        0x00000000c00035db       0x48 obj/timer.o
- .rodata        0x00000000c0003623       0xe9 obj/memory.o
- .rodata        0x00000000c000370c       0x63 obj/thread.o
- .rodata        0x00000000c000376f       0x3d obj/debug.o
+ .rodata        0x00000000c000463c       0x55 obj/main.o
+ .rodata        0x00000000c0004691        0xa obj/init.o
+ *fill*         0x00000000c000469b        0x1 
+ .rodata        0x00000000c000469c      0x2d3 obj/interrupt.o
+ .rodata        0x00000000c000496f       0x48 obj/timer.o
+ .rodata        0x00000000c00049b7       0x3d obj/debug.o
+ .rodata        0x00000000c00049f4      0x13a obj/memory.o
+ .rodata        0x00000000c0004b2e       0x38 obj/bitmap.o
+ .rodata        0x00000000c0004b66       0x57 obj/string.o
+ .rodata        0x00000000c0004bbd       0x7f obj/thread.o
+ .rodata        0x00000000c0004c3c       0x3a obj/sync.o
+ .rodata        0x00000000c0004c76        0xc obj/keyboard.o
+ .rodata        0x00000000c0004c82       0x4c obj/ioqueue.o
+ .rodata        0x00000000c0004cce       0x27 obj/tss.o
+ *fill*         0x00000000c0004cf5        0x3 
+ .rodata        0x00000000c0004cf8       0x62 obj/process.o
 
 .rodata1
  *(.rodata1)
@@ -220,27 +288,39 @@ LOAD obj/debug.o
  *(.eh_frame_hdr)
  *(.eh_frame_entry .eh_frame_entry.*)
 
-.eh_frame       0x00000000c00037ac      0x7c8
+.eh_frame       0x00000000c0004d5c      0xcec
  *(.eh_frame)
- .eh_frame      0x00000000c00037ac       0x6c obj/main.o
- .eh_frame      0x00000000c0003818       0x20 obj/init.o
+ .eh_frame      0x00000000c0004d5c       0xa4 obj/main.o
+ .eh_frame      0x00000000c0004e00       0x20 obj/init.o
                                          0x38 (size before relaxing)
- .eh_frame      0x00000000c0003838       0x8c obj/bitmap.o
-                                         0xa4 (size before relaxing)
- .eh_frame      0x00000000c00038c4      0x140 obj/string.o
-                                        0x158 (size before relaxing)
- .eh_frame      0x00000000c0003a04      0x188 obj/interrupt.o
+ .eh_frame      0x00000000c0004e20      0x188 obj/interrupt.o
                                         0x1a0 (size before relaxing)
- .eh_frame      0x00000000c0003b8c       0x8c obj/timer.o
+ .eh_frame      0x00000000c0004fa8       0x8c obj/timer.o
                                          0xa4 (size before relaxing)
- .eh_frame      0x00000000c0003c18      0x120 obj/list.o
-                                        0x138 (size before relaxing)
- .eh_frame      0x00000000c0003d38      0x120 obj/memory.o
-                                        0x138 (size before relaxing)
- .eh_frame      0x00000000c0003e58      0x100 obj/thread.o
-                                        0x118 (size before relaxing)
- .eh_frame      0x00000000c0003f58       0x1c obj/debug.o
+ .eh_frame      0x00000000c0005034       0x1c obj/debug.o
                                          0x34 (size before relaxing)
+ .eh_frame      0x00000000c0005050      0x180 obj/memory.o
+                                        0x198 (size before relaxing)
+ .eh_frame      0x00000000c00051d0       0x8c obj/bitmap.o
+                                         0xa4 (size before relaxing)
+ .eh_frame      0x00000000c000525c      0x140 obj/string.o
+                                        0x158 (size before relaxing)
+ .eh_frame      0x00000000c000539c      0x160 obj/thread.o
+                                        0x178 (size before relaxing)
+ .eh_frame      0x00000000c00054fc      0x140 obj/list.o
+                                        0x158 (size before relaxing)
+ .eh_frame      0x00000000c000563c       0xc0 obj/console.o
+                                         0xd8 (size before relaxing)
+ .eh_frame      0x00000000c00056fc       0xc8 obj/sync.o
+                                         0xe0 (size before relaxing)
+ .eh_frame      0x00000000c00057c4       0x60 obj/keyboard.o
+                                         0x78 (size before relaxing)
+ .eh_frame      0x00000000c0005824      0x100 obj/ioqueue.o
+                                        0x118 (size before relaxing)
+ .eh_frame      0x00000000c0005924       0x64 obj/tss.o
+                                         0x7c (size before relaxing)
+ .eh_frame      0x00000000c0005988       0xc0 obj/process.o
+                                         0xd8 (size before relaxing)
  *(.eh_frame.*)
 
 .gcc_except_table
@@ -251,7 +331,7 @@ LOAD obj/debug.o
 
 .exception_ranges
  *(.exception_ranges .exception_ranges*)
-                0x00000000c0005000                . = DATA_SEGMENT_ALIGN (0x1000, 0x1000)
+                0x00000000c0007000                . = DATA_SEGMENT_ALIGN (0x1000, 0x1000)
 
 .eh_frame
  *(.eh_frame)
@@ -273,18 +353,18 @@ LOAD obj/debug.o
  *(.tbss .tbss.* .gnu.linkonce.tb.*)
  *(.tcommon)
 
-.preinit_array  0x00000000c0005000        0x0
+.preinit_array  0x00000000c0007000        0x0
                 [!provide]                        PROVIDE (__preinit_array_start, .)
  *(.preinit_array)
                 [!provide]                        PROVIDE (__preinit_array_end, .)
 
-.init_array     0x00000000c0005000        0x0
+.init_array     0x00000000c0007000        0x0
                 [!provide]                        PROVIDE (__init_array_start, .)
  *(SORT(.init_array.*) SORT(.ctors.*))
  *(.init_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .ctors)
                 [!provide]                        PROVIDE (__init_array_end, .)
 
-.fini_array     0x00000000c0005000        0x0
+.fini_array     0x00000000c0007000        0x0
                 [!provide]                        PROVIDE (__fini_array_start, .)
  *(SORT(.fini_array.*) SORT(.dtors.*))
  *(.fini_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .dtors)
@@ -317,70 +397,93 @@ LOAD obj/debug.o
 .got
  *(.got)
  *(.igot)
-                0x00000000c0005000                . = DATA_SEGMENT_RELRO_END (., (SIZEOF (.got.plt) >= 0xc)?0xc:0x0)
+                0x00000000c0007000                . = DATA_SEGMENT_RELRO_END (., (SIZEOF (.got.plt) >= 0xc)?0xc:0x0)
 
-.got.plt        0x00000000c0005000        0x0
+.got.plt        0x00000000c0007000        0x0
  *(.got.plt)
  *(.igot.plt)
 
-.data           0x00000000c0005000       0x8c
+.data           0x00000000c0007000      0x156
  *(.data .data.* .gnu.linkonce.d.*)
- .data          0x00000000c0005000        0x0 obj/main.o
- .data          0x00000000c0005000        0x8 obj/print.o
- .data          0x00000000c0005008        0x0 obj/init.o
- .data          0x00000000c0005008        0x0 obj/bitmap.o
- .data          0x00000000c0005008        0x0 obj/string.o
- .data          0x00000000c0005008        0x0 obj/interrupt.o
- .data          0x00000000c0005008        0x0 obj/timer.o
- .data          0x00000000c0005008       0x84 obj/kernel.o
-                0x00000000c0005008                intr_entry_table
- .data          0x00000000c000508c        0x0 obj/list.o
- .data          0x00000000c000508c        0x0 obj/memory.o
- .data          0x00000000c000508c        0x0 obj/thread.o
- .data          0x00000000c000508c        0x0 obj/debug.o
+ .data          0x00000000c0007000        0x0 obj/main.o
+ .data          0x00000000c0007000        0x0 obj/init.o
+ .data          0x00000000c0007000        0x0 obj/interrupt.o
+ .data          0x00000000c0007000        0x0 obj/timer.o
+ .data          0x00000000c0007000       0xc0 obj/kernel.o
+                0x00000000c0007000                intr_entry_table
+ .data          0x00000000c00070c0        0x8 obj/print.o
+ .data          0x00000000c00070c8        0x0 obj/debug.o
+ .data          0x00000000c00070c8        0x0 obj/memory.o
+ .data          0x00000000c00070c8        0x0 obj/bitmap.o
+ .data          0x00000000c00070c8        0x0 obj/string.o
+ .data          0x00000000c00070c8        0x0 obj/thread.o
+ .data          0x00000000c00070c8        0x0 obj/list.o
+ .data          0x00000000c00070c8        0x0 obj/console.o
+ .data          0x00000000c00070c8        0x0 obj/sync.o
+ *fill*         0x00000000c00070c8       0x18 
+ .data          0x00000000c00070e0       0x76 obj/keyboard.o
+ .data          0x00000000c0007156        0x0 obj/ioqueue.o
+ .data          0x00000000c0007156        0x0 obj/tss.o
+ .data          0x00000000c0007156        0x0 obj/process.o
 
 .data1
  *(.data1)
-                0x00000000c000508c                _edata = .
+                0x00000000c0007156                _edata = .
                 [!provide]                        PROVIDE (edata, .)
-                0x00000000c000508c                . = .
-                0x00000000c000508c                __bss_start = .
+                0x00000000c0007156                . = .
+                0x00000000c0007156                __bss_start = .
 
-.bss            0x00000000c00050a0      0x298
+.bss            0x00000000c0007160      0x50c
  *(.dynbss)
  *(.bss .bss.* .gnu.linkonce.b.*)
- .bss           0x00000000c00050a0        0x0 obj/main.o
- .bss           0x00000000c00050a0        0x0 obj/init.o
- .bss           0x00000000c00050a0        0x0 obj/bitmap.o
- .bss           0x00000000c00050a0        0x0 obj/string.o
- .bss           0x00000000c00050a0      0x108 obj/interrupt.o
- .bss           0x00000000c00051a8        0x0 obj/timer.o
- .bss           0x00000000c00051a8        0x0 obj/list.o
- .bss           0x00000000c00051a8        0x0 obj/memory.o
- .bss           0x00000000c00051a8        0x4 obj/thread.o
- .bss           0x00000000c00051ac        0x0 obj/debug.o
+ .bss           0x00000000c0007160        0x8 obj/main.o
+                0x00000000c0007160                test_var_a
+                0x00000000c0007164                test_var_b
+ .bss           0x00000000c0007168        0x0 obj/init.o
+ *fill*         0x00000000c0007168       0x18 
+ .bss           0x00000000c0007180      0x180 obj/interrupt.o
+ .bss           0x00000000c0007300        0x0 obj/timer.o
+ .bss           0x00000000c0007300        0x0 obj/debug.o
+ .bss           0x00000000c0007300        0x0 obj/memory.o
+ .bss           0x00000000c0007300        0x0 obj/bitmap.o
+ .bss           0x00000000c0007300        0x0 obj/string.o
+ .bss           0x00000000c0007300        0x4 obj/thread.o
+ .bss           0x00000000c0007304        0x0 obj/list.o
+ .bss           0x00000000c0007304       0x1c obj/console.o
+ .bss           0x00000000c0007320        0x0 obj/sync.o
+ .bss           0x00000000c0007320       0x14 obj/keyboard.o
+ .bss           0x00000000c0007334        0x0 obj/ioqueue.o
+ .bss           0x00000000c0007334        0x0 obj/tss.o
+ .bss           0x00000000c0007334        0x0 obj/process.o
  *(COMMON)
- *fill*         0x00000000c00051ac       0x14 
- COMMON         0x00000000c00051c0      0x124 obj/interrupt.o
-                0x00000000c00051c0                intr_name
-                0x00000000c0005260                idt_table
- COMMON         0x00000000c00052e4        0x4 obj/timer.o
-                0x00000000c00052e4                ticks
- COMMON         0x00000000c00052e8       0x2c obj/memory.o
-                0x00000000c00052e8                user_pool
-                0x00000000c00052f8                kernel_vaddr
-                0x00000000c0005304                kernel_pool
- COMMON         0x00000000c0005314       0x24 obj/thread.o
-                0x00000000c0005314                thread_ready_list
-                0x00000000c0005324                thread_all_list
-                0x00000000c0005334                main_thread
-                0x00000000c0005338                . = ALIGN ((. != 0x0)?0x4:0x1)
-                0x00000000c0005338                . = ALIGN (0x4)
-                0x00000000c0005338                . = SEGMENT_START ("ldata-segment", .)
-                0x00000000c0005338                . = ALIGN (0x4)
-                0x00000000c0005338                _end = .
+ *fill*         0x00000000c0007334        0xc 
+ COMMON         0x00000000c0007340      0x180 obj/interrupt.o
+                0x00000000c0007340                intr_name
+                0x00000000c0007400                idt_table
+ COMMON         0x00000000c00074c0        0x4 obj/timer.o
+                0x00000000c00074c0                ticks
+ *fill*         0x00000000c00074c4       0x1c 
+ COMMON         0x00000000c00074e0       0x6c obj/memory.o
+                0x00000000c00074e0                user_pool
+                0x00000000c000750c                kernel_vaddr
+                0x00000000c0007520                kernel_pool
+ COMMON         0x00000000c000754c       0x24 obj/thread.o
+                0x00000000c000754c                thread_ready_list
+                0x00000000c000755c                thread_all_list
+                0x00000000c000756c                main_thread
+ *fill*         0x00000000c0007570       0x10 
+ COMMON         0x00000000c0007580       0x6c obj/keyboard.o
+                0x00000000c0007580                kbd_buf
+ *fill*         0x00000000c00075ec       0x14 
+ COMMON         0x00000000c0007600       0x6c obj/tss.o
+                0x00000000c0007600                tss
+                0x00000000c000766c                . = ALIGN ((. != 0x0)?0x4:0x1)
+                0x00000000c000766c                . = ALIGN (0x4)
+                0x00000000c000766c                . = SEGMENT_START ("ldata-segment", .)
+                0x00000000c000766c                . = ALIGN (0x4)
+                0x00000000c000766c                _end = .
                 [!provide]                        PROVIDE (end, .)
-                0x00000000c0005338                . = DATA_SEGMENT_END (.)
+                0x00000000c000766c                . = DATA_SEGMENT_END (.)
 
 .stab
  *(.stab)
@@ -405,14 +508,20 @@ LOAD obj/debug.o
  .comment       0x0000000000000000       0x2d obj/main.o
                                          0x2e (size before relaxing)
  .comment       0x000000000000002d       0x2e obj/init.o
- .comment       0x000000000000002d       0x2e obj/bitmap.o
- .comment       0x000000000000002d       0x2e obj/string.o
  .comment       0x000000000000002d       0x2e obj/interrupt.o
  .comment       0x000000000000002d       0x2e obj/timer.o
- .comment       0x000000000000002d       0x2e obj/list.o
- .comment       0x000000000000002d       0x2e obj/memory.o
- .comment       0x000000000000002d       0x2e obj/thread.o
  .comment       0x000000000000002d       0x2e obj/debug.o
+ .comment       0x000000000000002d       0x2e obj/memory.o
+ .comment       0x000000000000002d       0x2e obj/bitmap.o
+ .comment       0x000000000000002d       0x2e obj/string.o
+ .comment       0x000000000000002d       0x2e obj/thread.o
+ .comment       0x000000000000002d       0x2e obj/list.o
+ .comment       0x000000000000002d       0x2e obj/console.o
+ .comment       0x000000000000002d       0x2e obj/sync.o
+ .comment       0x000000000000002d       0x2e obj/keyboard.o
+ .comment       0x000000000000002d       0x2e obj/ioqueue.o
+ .comment       0x000000000000002d       0x2e obj/tss.o
+ .comment       0x000000000000002d       0x2e obj/process.o
 
 .debug
  *(.debug)

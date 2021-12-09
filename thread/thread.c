@@ -7,6 +7,8 @@
 #include "list.h"
 #include "debug.h"
 #include "print.h"
+#include "console.h"
+#include "process.h"
 
 #define PG_SIZE 4096
 
@@ -60,8 +62,7 @@ struct task_struct* thread_start(char* name,int prio,thread_func function,void* 
     //put_str("init thread done\n");
     thread_create(thread,function,func_arg);
     //put_str("create thread done\n");
-    //put_int(thread->self_kstack);
-    
+    //put_int(thread->self_kstack); 
     ASSERT(!elem_find(&thread_ready_list, &thread->general_tag));
     list_append(&thread_ready_list, &thread->general_tag);
     ASSERT(!elem_find(&thread_all_list, &thread->all_list_tag));
@@ -84,7 +85,7 @@ static void make_main_thread(){
 
 void schedule(){
     ASSERT(intr_get_status() == INTR_OFF);
-   
+    //console_put_str("schedule happend\n");
     struct task_struct* cur = running_thread();
     if(cur->status == TASK_RUNNING){
         ASSERT(!elem_find(&thread_ready_list, &cur->general_tag));
@@ -100,6 +101,7 @@ void schedule(){
     thread_tag = list_pop(&thread_ready_list);
     struct task_struct* next = elem2entry(struct task_struct,general_tag,thread_tag);
     next->status = TASK_RUNNING;
+    process_activate(next);
     switch_to(cur, next);
 }
 
@@ -109,4 +111,29 @@ void thread_init(){
     list_init(&thread_all_list);
     make_main_thread();
     put_str("thread_init done\n");
+}
+
+void thread_block(enum task_status stat){
+    ASSERT(stat==TASK_BLOCKED || stat==TASK_WAITING || stat==TASK_HANGING);
+    enum intr_status old_status = intr_disable();
+    struct task_struct* cur_thread = running_thread();
+    cur_thread->status = stat;
+    schedule();
+    intr_set_status(old_status);
+}
+
+void thread_unblock(struct task_struct* pthread){
+    enum intr_status old_status = intr_disable();
+    enum task_status stat = pthread->status;
+    ASSERT(stat==TASK_BLOCKED || stat==TASK_WAITING || stat==TASK_HANGING);
+    if(stat!=TASK_READY){
+        ASSERT(!elem_find(&thread_ready_list, &pthread->general_tag));
+        list_push(&thread_ready_list, &pthread->general_tag);
+        pthread->status = TASK_READY;
+    }
+    intr_set_status(old_status);
+}
+
+struct list* get_ready_list(){
+    return &thread_ready_list;
 }
