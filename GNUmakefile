@@ -7,7 +7,6 @@ CC+= -Wall -I lib/ -I kern/ -I userprog/ -I device/ -I thread/ -I . -fno-builtin
 CC+= -c -o
 bitmap.o:
 	$(CC) obj/bitmap.o ./kern/bitmap.c
-
 tss.o:
 	$(CC) obj/tss.o ./userprog/tss.c
 memory.o:
@@ -49,6 +48,15 @@ list.o:
 init.o:
 	$(CC) obj/init.o ./kern/init.c
 
+syscall.o:
+	$(CC) obj/syscall.o ./lib/syscall.c
+
+syscall-init.o:
+	$(CC) obj/syscall-init.o ./userprog/syscall-init.c
+
+stdio.o:
+	$(CC) obj/stdio.o ./lib/stdio.c
+
 main.o:
 	$(CC) obj/main.o ./kern/main.c
 
@@ -58,8 +66,8 @@ interrupt.o:
 debug.o:
 	$(CC)  obj/debug.o kern/debug.c
 
-create: string.o print.o kernel.o init.o main.o interrupt.o timer.o debug.o bitmap.o memory.o thread.o list.o switch.o console.o sync.o tss.o keyboard.o ioqueue.o process.o
-	ld -Ttext 0xc0001500 -e main obj/main.o obj/init.o obj/interrupt.o obj/timer.o obj/kernel.o obj/print.o obj/debug.o obj/memory.o obj/bitmap.o obj/string.o obj/thread.o obj/list.o obj/switch.o obj/console.o obj/sync.o obj/keyboard.o obj/ioqueue.o obj/tss.o obj/process.o -o obj/kernel.bin -Map obj/kernel.map
+create: string.o print.o kernel.o init.o main.o interrupt.o timer.o debug.o bitmap.o memory.o thread.o list.o switch.o console.o sync.o tss.o keyboard.o ioqueue.o process.o syscall.o syscall-init.o stdio.o
+	ld -Ttext 0xc0001500 -e main obj/main.o obj/init.o obj/interrupt.o obj/timer.o obj/kernel.o obj/print.o obj/debug.o obj/memory.o obj/bitmap.o obj/string.o obj/thread.o obj/list.o obj/switch.o obj/console.o obj/sync.o obj/keyboard.o obj/ioqueue.o obj/tss.o obj/process.o obj/syscall.o obj/syscall-init.o obj/stdio.o -o obj/kernel.bin -Map obj/kernel.map
 write: 
 	dd if=/home/niejian/Desktop/kernel/obj/kernel.bin of=/home/niejian/Desktop/bochs/hd60M.img bs=512 seek=9 count=200 conv=notrunc  
 
